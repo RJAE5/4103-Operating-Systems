@@ -15,7 +15,7 @@
 *         
 *  Usage:
 *         To use this program, use some standard C++ compiler such a g++,
-*         and simply execut the program.
+*         and simply execute the program.
 *         Ex: `g++ main.cpp -o main` and `./main`.
 *         The output will be room numbers from 00-20 with the floor number
 *         1-3 coming first. The order of these numbers is subject to change
@@ -27,12 +27,26 @@
 \******************************************************************************/
 
 #include <iostream>
-#include <unistd.h>
-#include <sys/wait.h>
+#include <unistd.h> // Needed for fork()
+#include <sys/wait.h> // Needed for waitpid()
 
 using namespace std;
 
-int main()
+void printFloorNums(int floor)
+{
+    // Note: If flush were added, it would make the floor number output jarringly disorganized.
+    // I learned this from ChatGPT with the prompt asking why the same floor was reliably
+    // on the same line instead of mixed around. It indicated that the lack of occasionally
+    // flushing caused each cout buffer to wait until the endl, which would mean the output
+    // buffer was completed with the desired output by the time it was flushed.
+
+    // I decided to comment it out because it was easier for testing to verify the ordered version
+    for(int i = 0; i <= 20; i++)
+        cout << 100 * floor + i << " "; // << flush; 
+    cout << endl;
+}
+
+int main() 
 {
     // Initial child creation
     int pid0 = fork();
@@ -53,9 +67,7 @@ int main()
         else
         {
             // pid1 Child code for printing the 1st floor numbers
-            for(int i = 0; i <= 20; i++)
-            {cout << 100 + i << " ";}
-            cout << endl;
+            printFloorNums(1);
         }
     } // End parent
     else
@@ -65,16 +77,12 @@ int main()
         if(pid2 != 0)
         {
             // Initial child printing 2nd floor (pid0)
-            for(int i = 0; i <= 20; i++)
-            {cout << 200 + i << " ";}
-            cout << endl;
+            printFloorNums(2);
         }
         else
         {
             // 3rd child code printing 3rd floor numbers
-            for(int i = 0; i <= 20; i++)
-            {cout << 300 + i << " ";}
-            cout << endl;
+            printFloorNums(3);
         }
     } // End initial child
 } // End main
