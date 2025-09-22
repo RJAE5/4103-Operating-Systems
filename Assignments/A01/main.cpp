@@ -10,7 +10,7 @@
 *  Description:
 *         This program introduces the POSIX fork() function and utilizing
 *         children to speed up the execution of a program. The output is
-*         meant to resemble the room numbers the regarding Bolin Science Hall
+*         meant to resemble the room numbers regarding the Bolin Science Hall
 *         remodel.
 *         
 *  Usage:
