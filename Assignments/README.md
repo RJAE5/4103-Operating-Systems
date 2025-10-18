@@ -11,3 +11,4 @@ The purpose of this disclaimer is to enhance my personal standards on properly c
 |  #  | Folder        | Description                             |
 | --- | ------------- | --------------------------------------- |
 | A01 | [A01](./A01/) | Mini Project 1 - POSIX Fork()           |
+| A02 | [A02](./A01/) | Mini Project 2 - POSIX Threads          |
