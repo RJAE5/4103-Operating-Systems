@@ -145,14 +145,28 @@ int main()
             cout << "Error from pthread_create" << endl;
             exit(-1);
         }
+    }
 
-        // Use join function to ensure threads wait on each other
-        // Otherwise sum would be output before they finish running
+    for(int i = 0; i < NUM_THREADS; i++)
+    {
+        // Use join function to ensure threads wait on each other.
+        // Otherwise sum would output before they finish running.
+        // It is also crucial that it has its own for loop, otherwise
+        // the various threads run sequentially, and the mutex becomes
+        // useless
         pthread_join(threads[i], NULL);
     }
 
     // Show the sum added by all the threads
     cout << "Sum = " << sum << endl;
-
     return 0;
 }
+
+// There definitely was a difference between using semaphores and not.
+// Without the mutex locking, the value of `sum` varies exceptionally
+// between runs, resulting in false values. I tried to condensethe code
+// by leaving the pthread_join() function in the main for loop, but then
+// through troubleshooting, I learned that the mutex became useless afer
+// this, so I figured it's own for loop was necessary, as the threads
+// would run sequentially otherwise.
+
