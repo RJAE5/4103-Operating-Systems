@@ -8,125 +8,151 @@
 *  Semester:         Fall 2025
 *
 *  Description:
-*         This program introduces the POSIX fork() function and utilizing
-*         children to speed up the execution of a program. The output is
-*         meant to resemble the room numbers regarding the Bolin Science Hall
-*         remodel.
+*         This program introduces the POSIX thread, allowing us to run
+*         the same function multiple times concurrently. This specific
+*         program generates a random 100x100x20 3D array with each index
+*         containing a random 1-digit number 0-9, and keeps track of the
+*         true sum of all of these indicies. The main portion creates
+*         5 threads which iterate through a certain portion of the array
+*         adding to the global variable `sum` and outputs this value.
 *         
 *  Usage:
 *         To use this program, use some standard C++ compiler such a g++,
 *         and simply execute the program.
 *         Ex: `g++ main.cpp -o main` and `./main`.
-*         The output will be room numbers from 00-20 with the floor number
-*         1-3 coming first. The order of these numbers is subject to change
-*         depending on exact execution time, exhibiting a drawback of children.
-*         The program ends with the parent printing `Goodbye!`
+*         The output will be the true sum of each index in the array
+*         followed by the output of the `sum` variable, which will vary
+*         wildly from run to run because of multithreading. With the
+*         implementation of mutex semaphores, the code works as intended.
 *         
 *  Files: 
 *         main.cpp
 \******************************************************************************/
 
-#include <pthread.h>
+#include <pthread.h> // Needed for thread creation
 #include <iostream>
-#include <iomanip>
-#include <cstdlib>
 #include <random>
-
-
 
 #define NUM_THREADS 5
 
 using namespace std;
 
-
-// void *print_hw(void * tid)
-// {
-//     int *id_ptr = (int *)tid;
-//     cout << "Hello World. Greetings from thread " << *id_ptr << endl;
-// }
-
+// Global variables
 int trueSum = 0;
 int sum = 0;
 int A[100][100][20];
+pthread_mutex_t mutex;
 
+/*
+    * Public : generate_array()
+    *
+    * Description:
+    *      Initializes a 3D array of dimensions 100x100x20
+    *      with random numbers 0-9 for each index and
+    *      also updates the trueSum variable
+    *
+    * Params:
+    *     None
+    *
+    * Returns:
+    *     None
+*/
 void generate_array()
 {
+    // 3D foor loop
     for(int i = 0; i < 100; i++)
     {
         for(int j = 0; j < 100; j++)
         {
             for(int k = 0; k < 20; k++)
             {
-                A[i][j][k] = rand() % 10;
-                trueSum += A[i][j][k];
+                // Generate random number
+                int temp = rand() % 10;
+
+                // Store it in current index
+                A[i][j][k] = temp;
+
+                // Update trueSum
+                trueSum += temp;
             }
         }
-
     }
 }
 
-
+/*
+    * Public : *sum_array
+    *
+    * Description:
+    *      Initializes a new round by resetting letter checks, bad guesses,
+    *      and generating a new category and word.
+    *
+    * Params:
+    *     void * tid - The id of the thread, in address form
+    *
+    * Returns:
+    *     None
+*/
 void *sum_array(void * tid)
 {
+    // Cast the thread id to an integer: 0-4
     int *id_ptr = (int *)tid;
-    for(int i = *id_ptr * 20; i < (*id_ptr + 1) * 20 - 1; i++)
+
+    // Iterate through each section using tids 0-4
+    for(int i = *id_ptr * 20; i < (*id_ptr + 1) * 20; i++)
     {
         for(int j = 0; j < 100; j++)
         {
             for(int k = 0; k < 20; k++)
             {
+                // Lock the mutex to ensure exclusive access
+                // Commenting this and the unlock function result
+                // In the sum varying from run to run
+                pthread_mutex_lock(&mutex);
                 sum += A[i][j][k];
+                pthread_mutex_unlock(&mutex);
             }
         }
     }
 
+    return NULL;
 }
 
 int main()
 {
+    // Create the array containing the threads
     pthread_t threads[NUM_THREADS];
     int status;
 
+    // Generate the 3D array
     generate_array();
 
-
-
-
+    // Show the true tracked sum of the array
     cout << "True Sum = " << trueSum << endl;
 
-        for(int i = 0; i < NUM_THREADS; i++)
+    // Create the threads
+    for(int i = 0; i < NUM_THREADS; i++)
     {
+        // Store i as a pointer to pass to the threaded function
+        // since it cannot take pure integers
         int *arg = new int;
         *arg = i;
-
-        cout << "Main here, creating thread " << i << endl;
+        
+        // Generate the threads, store in array, and assign their func
         status = pthread_create(&threads[i], NULL, sum_array, arg);
 
         if(status != 0)
         {
             cout << "Error from pthread_create" << endl;
             exit(-1);
-
         }
-        
+
+        // Use join function to ensure threads wait on each other
+        // Otherwise sum would be output before they finish running
+        pthread_join(threads[i], NULL);
     }
 
+    // Show the sum added by all the threads
     cout << "Sum = " << sum << endl;
 
-
-    // for(int i = 0; i < NUM_THREADS; i++)
-    // {
-    //     cout << "Main here, creating thread " << i << endl;
-    //     status = pthread_create(&threads[i], NULL, print_hw, (void *)i);
-
-    //     if(status != 0)
-    //     {
-    //         cout << "Error from pthread_create" << endl;
-    //         exit(-1);
-
-    //     }
-        
-    // }
-    // return 0;
-
+    return 0;
 }
