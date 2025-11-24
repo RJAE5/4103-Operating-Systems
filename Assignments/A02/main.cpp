@@ -1,8 +1,8 @@
 /*****************************************************************************\
 *
-*  Author:           Rykir Evans
-*  Email:            rjevans0408@my.msutexas.edu | rykirjoe@yahoo.com
-*  Title:            POSIX Fork
+*  Author:           Rykir Evans & Victoria Heredia
+*  Email:            rjevans0408@my.msutexas.edu | vdheredia1128@my.msutexas.edu
+*  Title:            POSIX Thread
 *  Course:           CMPS 4103 Intro to Operating Systems
 *  Professor:        Dr. Nelson Passos
 *  Semester:         Fall 2025
@@ -21,9 +21,9 @@
 *         and simply execute the program.
 *         Ex: `g++ main.cpp -o main` and `./main`.
 *         The output will be the true sum of each index in the array
-*         followed by the output of the `sum` variable, which will vary
-*         wildly from run to run because of multithreading. With the
-*         implementation of mutex semaphores, the code works as intended.
+*         followed by the output of the `sum` variable, which may vary
+*         wildly from run to run because of multithreading. However, With 
+*         the implementation of mutex semaphores, the code works as intended.
 *         
 *  Files: 
 *         main.cpp
